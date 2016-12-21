@@ -199,6 +199,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         X = np.loadtxt(os.path.join(this_directory, "components",
                                     "data_preprocessing", "dataset.pkl"))
         y = X[:, -1].copy()
+        # make the consecutive between 0 and n_classes-1 to allow Auto-Net,
+        # which does not label-checking itself to work on this kind of data
+        y[y == 4.0] = 3.0
+        y[y == 5.0] = 4.0
         X = X[:,:-1]
         X_train, X_test, Y_train, Y_test = \
             sklearn.cross_validation.train_test_split(X, y)
@@ -231,8 +235,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'preprocessor:gem:N': 5,
                             'classifier:proj_logit:max_epochs': 1,
                             'classifier:libsvm_svc:degree': 2,
-                            'regressor:libsvm_svr:degree': 2,
-                            'preprocessor:feature_agglomeration:n_clusters': 2}
+                            'classifier:libsvm_svr:degree': 2,
+                            'preprocessor:feature_agglomeration:n_clusters': 2,
+                            'classifier:DeepFeedNet:number_epochs': 2,
+                            'classifier:DeepNetIterative:number_epochs': 2,
+                            'classifier:DeepFeedNet:batch_size': 150,
+                            'classifier:DeepNetIterative:batch_size': 150}
 
             for restrict_parameter in restrictions:
                 restrict_to = restrictions[restrict_parameter]
@@ -249,6 +257,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 Y_train = data['Y_train'].copy()
                 X_test = data['X_test'].copy()
                 Y_test = data['Y_test'].copy()
+
+            print("Y!", np.unique(Y_train), np.unique(Y_test))
 
             cls = SimpleClassificationPipeline(config, random_state=1)
             try:
@@ -268,6 +278,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 elif "Numerical problems in QDA" in e.args[0]:
                     continue
                 elif 'Bug in scikit-learn' in e.args[0]:
+                    continue
+                elif "lead to a target dimension of" in e.args[0]:
                     continue
                 else:
                     print(config)
@@ -309,12 +321,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(len(cs.get_hyperparameter(
             'rescaling:__choice__').choices), 4)
         self.assertEqual(len(cs.get_hyperparameter(
-            'classifier:__choice__').choices), 17)
+            'classifier:__choice__').choices), 19)
         self.assertEqual(len(cs.get_hyperparameter(
-            'preprocessor:__choice__').choices), 14)
+            'preprocessor:__choice__').choices), 15)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(157, len(hyperparameters))
+        self.assertEqual(284, len(hyperparameters))
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp

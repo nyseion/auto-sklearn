@@ -84,6 +84,12 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             config._populate_values()
             if config['regressor:sgd:n_iter'] is not None:
                 config._values['regressor:sgd:n_iter'] = 5
+            if 'regressor:RegDeepNet:number_epochs' in config and \
+                    config['regressor:RegDeepNet:number_epochs'] is not None:
+                config._values['regressor:RegDeepNet:number_epochs'] = 2
+            if 'regressor:RegDeepNet:number_epochs' in config and \
+                    config['regressor:RegDeepNet:batch_size'] is not None:
+                config._values['regressor:RegDeepNet:batch_size'] = 150
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
             cls = SimpleRegressionPipeline(config, random_state=1)
@@ -104,6 +110,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 elif "removed all features" in e.args[0]:
                     continue
                 elif "Bug in scikit-learn:" in e.args[0]:
+                    continue
+                elif "lead to a target dimension of" in e.args[0]:
                     continue
                 else:
                     print(config)
@@ -143,13 +151,18 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if 'classifier:passive_aggressive:n_iter' in config and \
-                            config[
-                                'classifier:passive_aggressive:n_iter'] is not None:
-                config._values['classifier:passive_aggressive:n_iter'] = 5
-            if 'classifier:sgd:n_iter' in config and \
-                            config['classifier:sgd:n_iter'] is not None:
-                config._values['classifier:sgd:n_iter'] = 5
+            if 'regressor:passive_aggressive:n_iter' in config and \
+                    config['regressor:passive_aggressive:n_iter'] is not None:
+                config._values['regressor:passive_aggressive:n_iter'] = 5
+            if 'regressor:sgd:n_iter' in config and \
+                    config['regressor:sgd:n_iter'] is not None:
+                config._values['regressor:sgd:n_iter'] = 5
+            if 'regressor:RegDeepNet:number_epochs' in config and \
+                    config['regressor:RegDeepNet:number_epochs'] is not None:
+                config._values['regressor:RegDeepNet:number_epochs'] = 2
+            if 'regressor:RegDeepNet:number_epochs' in config and \
+                    config['regressor:RegDeepNet:batch_size'] is not None:
+                config._values['regressor:RegDeepNet:batch_size'] = 150
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
             cls = SimpleRegressionPipeline(config, random_state=1)
@@ -167,6 +180,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                                 "removed all features" in e.args[0] or \
                                 "all features are discarded" in e.args[0] or \
                         "Bug in scikit-learn" in e.args[0]:
+                    continue
+                elif "lead to a target dimension of" in e.args[0]:
                     continue
                 else:
                     print(config)
@@ -206,13 +221,18 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if 'classifier:passive_aggressive:n_iter' in config and \
-                            config[
-                                'classifier:passive_aggressive:n_iter'] is not None:
-                config._values['classifier:passive_aggressive:n_iter'] = 5
-            if 'classifier:sgd:n_iter' in config and \
-                            config['classifier:sgd:n_iter'] is not None:
-                config._values['classifier:sgd:n_iter'] = 5
+            if 'regressor:passive_aggressive:n_iter' in config and \
+                    config['regressor:passive_aggressive:n_iter'] is not None:
+                config._values['regressor:passive_aggressive:n_iter'] = 5
+            if 'regressor:sgd:n_iter' in config and \
+                    config['regressor:sgd:n_iter'] is not None:
+                config._values['regressor:sgd:n_iter'] = 5
+            if 'regressor:RegDeepNet:number_epochs' in config and \
+                    config['regressor:RegDeepNet:number_epochs'] is not None:
+                config._values['regressor:RegDeepNet:number_epochs'] = 2
+            if 'regressor:RegDeepNet:number_epochs' in config and \
+                    config['regressor:RegDeepNet:batch_size'] is not None:
+                config._values['regressor:RegDeepNet:batch_size'] = 150
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes',
                                                            make_sparse=True)
@@ -225,6 +245,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                         e.args[0] or \
                                 "removed all features" in e.args[0] or \
                                 "all features are discarded" in e.args[0]:
+                    continue
+                elif "lead to a target dimension of" in e.args[0]:
                     continue
                 else:
                     print(config)
@@ -284,7 +306,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(143, len(hyperparameters))
+        self.assertEqual(207, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 5, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
