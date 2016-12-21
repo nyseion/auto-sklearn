@@ -258,8 +258,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 X_test = data['X_test'].copy()
                 Y_test = data['Y_test'].copy()
 
-            print("Y!", np.unique(Y_train), np.unique(Y_test))
-
             cls = SimpleClassificationPipeline(config, random_state=1)
             try:
                 init_params_ = copy.deepcopy(init_params)
