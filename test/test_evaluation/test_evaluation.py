@@ -36,6 +36,8 @@ class EvaluationTest(unittest.TestCase):
         self.logger = logging.getLogger()
         scenario_mock = unittest.mock.Mock()
         scenario_mock.wallclock_limit = 10
+        scenario_mock.algo_runs_timelimit = 1000
+        scenario_mock.ta_run_limit = 100
         self.scenario = scenario_mock
         stats = Stats(scenario_mock)
         stats.start_timing()
@@ -99,7 +101,7 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger,
                                     stats=self.stats)
         self.scenario.wallclock_limit = 5
-        info = ta.run(None, cutoff=10, memory_limit=3000)
+        info = ta.start(None, instance=None, cutoff=10)
         fixture = (StatusType.ABORT, np.nan, 0, {"misc": "exhausted bugdet -- ABORT"})
         self.assertEqual(info, fixture)
 
@@ -109,7 +111,8 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats)
-        ta.run(None, cutoff=30, memory_limit=3000)
+        self.stats.ta_runs = 1
+        ta.start(None, cutoff=30, instance=None)
         self.assertEqual(pynisher_mock.call_args[1]['wall_time_in_s'], 4)
         self.assertIsInstance(pynisher_mock.call_args[1]['wall_time_in_s'], int)
 
@@ -147,4 +150,19 @@ class EvaluationTest(unittest.TestCase):
         info = ta.run(None, cutoff=30, memory_limit=3000)
         self.assertEqual(info[0], StatusType.TIMEOUT)
         self.assertEqual(info[1], 1.0)
+        self.assertIsInstance(info[2], float)
+
+    @unittest.mock.patch('autosklearn.evaluation.eval_holdout')
+    def test_eval_with_limits_holdout_timeout_with_results_in_queue(self, pynisher_mock):
+        def side_effect(**kwargs):
+            queue = kwargs['queue']
+            queue.put((StatusType.SUCCESS, 0.5, 0.12345, ''))
+        pynisher_mock.side_effect = side_effect
+        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+                                    resampling_strategy='holdout',
+                                    logger=self.logger,
+                                    stats=self.stats)
+        info = ta.run(None, cutoff=30, memory_limit=3000)
+        self.assertEqual(info[0], StatusType.SUCCESS)
+        self.assertEqual(info[1], 0.5)
         self.assertIsInstance(info[2], float)
