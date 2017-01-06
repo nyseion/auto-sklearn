@@ -29,7 +29,7 @@ requirements = [
     "ConfigArgParse",
     "liac-arff",
     "pandas",
-    "xgboost==0.4a30",
+    "xgboost",
     "ConfigSpace",
     "pynisher>=0.4",
     "pyrfr",
