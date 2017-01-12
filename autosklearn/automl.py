@@ -407,7 +407,7 @@ class AutoML(BaseEstimator):
                                     resampling_strategy_args=self._resampling_strategy_arguments,
                                     acquisition_function=self.acquisition_function,
                                     shared_mode=self._shared_mode)
-            self.runhistory_ = _proc_smac.run_smbo()
+            self.runhistory_, self.trajectory_ = _proc_smac.run_smbo()
             runhistory_filename = os.path.join(self._backend.temporary_directory,
                                                'runhistory.json',)
             self.runhistory_.save_json(runhistory_filename)
@@ -505,6 +505,7 @@ class AutoML(BaseEstimator):
             1, task, metric, precision, dataset_name, max_iterations=1,
             ensemble_nbest=ensemble_nbest, ensemble_size=ensemble_size)
         self._proc_ensemble.main()
+        self._proc_ensemble = None
         return self
 
     def _get_ensemble_process(self, time_left_for_ensembles,
